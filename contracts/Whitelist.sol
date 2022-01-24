@@ -2,14 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
 interface IERC721WhitelistedMintable {
     function mint(address to) external;
 }
 
-contract Whitelist is Context, AccessControlEnumerable {
+contract Whitelist is Context, AccessControl {
     struct WhitelistedAccount {
         address account;
         uint256 count;
@@ -21,15 +21,6 @@ contract Whitelist is Context, AccessControlEnumerable {
     mapping(uint256 => bool) private whitelistStatus;
 
     IERC721WhitelistedMintable immutable token;
-
-    modifier onlyManager() {
-        require(
-            hasRole(WHITELIST_MANAGER, _msgSender()),
-            "Requires whitelist manager role!"
-        );
-
-        _;
-    }
 
     modifier whitelisted(uint256 listId) {
         require(
@@ -61,7 +52,7 @@ contract Whitelist is Context, AccessControlEnumerable {
     function set(uint256 listId, WhitelistedAccount[] calldata accounts)
         public
         virtual
-        onlyManager
+        onlyRole(WHITELIST_MANAGER)
     {
         uint256 count = accounts.length;
         for (uint256 i = 0; i < count; i++) {
@@ -71,18 +62,26 @@ contract Whitelist is Context, AccessControlEnumerable {
         whitelistStatus[listId] = true;
     }
 
-    function deactivate(uint256 listId) public virtual onlyManager {
+    function deactivate(uint256 listId)
+        public
+        virtual
+        onlyRole(WHITELIST_MANAGER)
+    {
         whitelistStatus[listId] = false;
     }
 
-    function activate(uint256 listId) public virtual onlyManager {
+    function activate(uint256 listId)
+        public
+        virtual
+        onlyRole(WHITELIST_MANAGER)
+    {
         whitelistStatus[listId] = true;
     }
 
     function removeFrom(uint256 listId, address[] memory accounts)
         public
         virtual
-        onlyManager
+        onlyRole(WHITELIST_MANAGER)
     {
         uint256 count = accounts.length;
         for (uint256 i = 0; i < count; i++) {

@@ -16,11 +16,11 @@ contract Treasure is Ownable {
 
     receive() external payable {}
 
-    function balance() public view returns (uint256) {
+    function balance() external view returns (uint256) {
         return address(this).balance;
     }
 
-    function withdraw() public onlyOwner {
+    function withdraw() external onlyOwner {
         payable(owner()).transfer(address(this).balance);
     }
 }
