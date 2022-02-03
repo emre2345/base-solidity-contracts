@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
 interface IERC721WhitelistedMintable {
-    function mint(address to) external;
+    function mint(address to, uint256 id) external;
 }
 
-contract Whitelist is Context, AccessControl {
+abstract contract Whitelist is Context, AccessControl {
     struct WhitelistedAccount {
         address account;
         uint256 count;
@@ -89,15 +89,15 @@ contract Whitelist is Context, AccessControl {
         }
     }
 
-    function redeemFrom(uint256 listId)
-        public
-        whitelisted(listId)
-        whitelistActive(listId)
-    {
-        token.mint(_msgSender());
+    function redeemFrom(uint256 listId) external virtual;
 
-        whitelists[listId][_msgSender()]--;
-    }
+    // whitelisted(listId)
+    // whitelistActive(listId);
+    // {
+    //     token.mint(_msgSender());
+
+    //     whitelists[listId][_msgSender()]--;
+    // }
 
     function isWhitelisted(uint256 listId, address account)
         public
